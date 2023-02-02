@@ -1,96 +1,44 @@
 import "./App.css";
-import {Pose} from '@mediapipe/pose'
+import * as pose from '@mediapipe/pose'
 import smoothLandmarks from 'mediapipe-pose-smooth'; // ES6
-import Webcam from 'react-webcam'
 import * as cam from "@mediapipe/camera_utils"
+import * as drawingUtils from "@mediapipe/drawing_utils"
 import {useRef, useEffect, useState, useDebugValue} from "react"
 
 function App() {
   const webcamRef = useRef(null)
   const canvasRef = useRef(null)
-  const gridRef = useRef(null)
   var camera = null
-  const drawingUtils = window;
-  const mpPose = window;
-  const controls = window;
   const [didLoad, setdidLoad] = useState(false)
 
-  const LandmarkGrid = window.LandmarkGrid;
-  var grid = null
-
-
   function onResults(results){
-    if (!results.poseLandmarks) {
-      grid.updateLandmarks([]);
-      return;
-    }
-    document.body.classList.add('loaded');
     const canvasElement = canvasRef.current
     const canvasCtx = canvasElement.getContext("2d")
-    canvasCtx.save();
-    let activeEffect = 'mask';
 
+    canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    if (results.segmentationMask) {
-      canvasCtx.drawImage(results.segmentationMask, 0, 0, canvasElement.width, canvasElement.height);
-      if (activeEffect === 'mask' || activeEffect === 'both') {
-          canvasCtx.globalCompositeOperation = 'source-in';
-          canvasCtx.fillStyle = '#00FF007F';
-          canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-      }
-      else {
-          canvasCtx.globalCompositeOperation = 'source-out';
-          canvasCtx.fillStyle = '#0000FF7F';
-          canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-      }
-      canvasCtx.globalCompositeOperation = 'destination-atop';
-      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-      canvasCtx.globalCompositeOperation = 'source-over';
-    }
-    else {
-      canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-    }
+    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
     if (results.poseLandmarks) {
-      drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, mpPose.POSE_CONNECTIONS, { visibilityMin: 0.65, color: 'white' });
-      drawingUtils.drawLandmarks(canvasCtx, Object.values(mpPose.POSE_LANDMARKS_LEFT)
+      drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, pose.POSE_CONNECTIONS, { visibilityMin: 0.65, color: 'white' });
+      drawingUtils.drawLandmarks(canvasCtx, Object.values(pose.POSE_LANDMARKS_LEFT)
           .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(255,138,0)' });
-      drawingUtils.drawLandmarks(canvasCtx, Object.values(mpPose.POSE_LANDMARKS_RIGHT)
+      drawingUtils.drawLandmarks(canvasCtx, Object.values(pose.POSE_LANDMARKS_RIGHT)
           .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(0,217,231)' });
-      drawingUtils.drawLandmarks(canvasCtx, Object.values(mpPose.POSE_LANDMARKS_NEUTRAL)
+      drawingUtils.drawLandmarks(canvasCtx, Object.values(pose.POSE_LANDMARKS_NEUTRAL)
           .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'white' });
     }
-    if (results.poseWorldLandmarks) {
-      grid.updateLandmarks(results.poseWorldLandmarks, mpPose.POSE_CONNECTIONS, [
-          { list: Object.values(mpPose.POSE_LANDMARKS_LEFT), color: 'LEFT' },
-          { list: Object.values(mpPose.POSE_LANDMARKS_RIGHT), color: 'RIGHT' },
-      ]);
-    }
-    else {
-      grid.updateLandmarks([]);
-    }
+    canvasCtx.restore();
   }
 
   useEffect(() => {
     if(!didLoad){
-      const pose = new Pose({
+      const mpPose = new pose.Pose({
         locateFile: (file) => {
             return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
         },
       });
-      if (!grid){
-        grid = new LandmarkGrid(gridRef.current, {
-          connectionColor: 0xCCCCCC,
-          definedColors: [{ name: 'LEFT', value: 0xffa500 }, { name: 'RIGHT', value: 0x00ffff }],
-          range: 2,
-          fitToGrid: true,
-          labelSuffix: 'm',
-          landmarkSize: 1,
-          numCellsPerAxis: 4,
-          showHidden: false,
-          centered: true,
-        });
-      }
-      pose.setOptions({
+      mpPose.setOptions({
         selfieMode: true,
         modelComplexity: 1,
         smoothLandmarks: true,
@@ -100,32 +48,35 @@ function App() {
         minTrackingConfidence: 0.5,
       });
 
-      // Pass another function to receive the results
-      pose.onResults(onResults);
-
-      if(typeof webcamRef.current !== "undefined" && webcamRef.current !== null ){
-        camera = new cam.Camera(webcamRef.current.video, {
-          onFrame:async() => {
-            await pose.send({image: webcamRef.current.video});
+      camera = new cam.Camera(webcamRef.current, {
+        onFrame:async() => {
+          const canvasElement = canvasRef.current
+          const aspect = window.innerHeight / window.innerWidth;
+          let width, height;
+          if (window.innerWidth > window.innerHeight) {
+              height = window.innerHeight;
+              width = height / aspect;
           }
-        })
-      }
+          else {
+              width = window.innerWidth;
+              height = width * aspect;
+          }
+          canvasElement.width = width;
+          canvasElement.height = height;
+          await mpPose.send({image: webcamRef.current});
+        }
+      })
       camera.start();
+
+      mpPose.onResults((results) => smoothLandmarks(results, onResults));
       setdidLoad(true)
     }
   },[didLoad])
 
   return <div className="App">
     <div className="container">
-      <Webcam ref={webcamRef} className="input_video"/>
-      <canvas ref={canvasRef} className='output_canvas' style={{
-        width: "1200px",
-        height: "720px"
-      }} ></canvas>
-    </div>
-    <div className="control-panel"></div>
-    <div className="square-box">
-      <div className="landmark-grid-container" ref={gridRef}></div>
+      <video className="input_video" ref={webcamRef}/>
+      <canvas ref={canvasRef} className='output_canvas' ></canvas>
     </div>
   </div>;
 }
