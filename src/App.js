@@ -4,6 +4,8 @@ import smoothLandmarks from 'mediapipe-pose-smooth'; // ES6
 import * as cam from "@mediapipe/camera_utils"
 import * as drawingUtils from "@mediapipe/drawing_utils"
 import {useRef, useEffect, useState, useDebugValue} from "react"
+import * as mposeUtils from './utils/mpPoseUtils'
+import TPose from "./poseClassifier/TPose";
 
 function App() {
   const webcamRef = useRef(null)
@@ -15,12 +17,20 @@ function App() {
     const canvasElement = canvasRef.current
     const canvasCtx = canvasElement.getContext("2d")
 
+    const angles = mposeUtils.calFullPoseAngles(mposeUtils.simplifyPoseLandmarks(results))
+    console.log('full pose angles', angles)
+
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
+
+    const result1 = TPose(angles)
+    console.log(pose.POSE_CONNECTIONS)
     if (results.poseLandmarks) {
-      drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, pose.POSE_CONNECTIONS, { visibilityMin: 0.65, color: 'white' });
+      drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, pose.POSE_CONNECTIONS, { visibilityMin: 0.65, color: 'green' });
+      drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, [[11,12],[12,14],[13,11]], { visibilityMin: 0.65, color: 'red' });
+
       drawingUtils.drawLandmarks(canvasCtx, Object.values(pose.POSE_LANDMARKS_LEFT)
           .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(255,138,0)' });
       drawingUtils.drawLandmarks(canvasCtx, Object.values(pose.POSE_LANDMARKS_RIGHT)
@@ -32,7 +42,6 @@ function App() {
   }
 
   useEffect(() => {
-    if(!didLoad){
       const mpPose = new pose.Pose({
         locateFile: (file) => {
             return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
@@ -71,7 +80,7 @@ function App() {
       mpPose.onResults((results) => smoothLandmarks(results, onResults));
       setdidLoad(true)
     }
-  },[didLoad])
+  ,[])
 
   return <div className="App">
     <div className="container">
