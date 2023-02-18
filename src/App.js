@@ -4,8 +4,8 @@ import smoothLandmarks from 'mediapipe-pose-smooth'; // ES6
 import { Camera } from '@mediapipe/camera_utils';
 import * as drawingUtils from "@mediapipe/drawing_utils"
 import { useRef, useEffect, useState, useDebugValue } from "react"
+import TPose from "./PoseClassifiers/Yoga/TPose";
 import * as mposeUtils from './utils/MpPose.util'
-import TPose from "./PoseClassifiers/TPose";
 
 
 function App() {
@@ -87,6 +87,10 @@ function App() {
   }, [mpPose]);
 
   function onResults(results) {
+    if (!results?.poseLandmarks) {
+      return;
+    }
+
     const canvasElement = canvasRef.current
 
     canvasElement.width = results.image.width;
@@ -97,15 +101,19 @@ function App() {
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
-    const angles = mposeUtils.calcFullPoseAngles(mposeUtils.simplifyPoseLandmarks(results))
+    const simplifiedPoseLandmarks = mposeUtils.simplifyPoseLandmarks(results);
+    const angles = mposeUtils.calcFullPoseAngles(simplifiedPoseLandmarks)
     console.log('full pose angles', angles)
 
     const tPoseResult = TPose(angles);
     console.log(pose.POSE_CONNECTIONS);
 
+    const poseLable = document.getElementById('pose-lable-text');
+    poseLable.innerHTML = tPoseResult.length < 1 ? 'Pose: T POSE' : 'Pose: UNKNOWN';
+
     if (results.poseLandmarks) {
       drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, pose.POSE_CONNECTIONS, { visibilityMin: 0.65, color: 'green' });
-      drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, [[11, 12], [12, 14], [13, 11]], { visibilityMin: 0.65, color: 'red' });
+      drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, tPoseResult, { visibilityMin: 0.65, color: 'red' });
 
       drawingUtils.drawLandmarks(canvasCtx, Object.values(pose.POSE_LANDMARKS_LEFT)
         .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(255,138,0)' });
@@ -114,6 +122,10 @@ function App() {
       drawingUtils.drawLandmarks(canvasCtx, Object.values(pose.POSE_LANDMARKS_NEUTRAL)
         .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'white' });
     }
+
+    // canvasCtx.fillStyle = 'black';
+    // canvasCtx.font = "bold 18px Arial";
+    // canvasCtx.fillText(angles.left_armAngle, simplifiedPoseLandmarks[13].x, simplifiedPoseLandmarks[13].y, 800);
     canvasCtx.restore();
   }
 
@@ -121,6 +133,10 @@ function App() {
     <div className="container">
       <video className="input_video" ref={webcamRef} />
       <canvas ref={canvasRef} className='output_canvas' ></canvas>
+    </div>
+
+    <div id="pose-lable" style={{ padding: '10px', width: 'fit-content', position: 'sticky', background: 'cadetblue' }}>
+      <p id="pose-lable-text">Pose: Unknown</p>
     </div>
   </div>;
 }

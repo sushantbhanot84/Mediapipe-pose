@@ -140,24 +140,36 @@ function getLeftElbowToWristConnectors() {
   return [POSE_LANDMARKS_LEFT.LEFT_ELBOW, POSE_LANDMARKS_LEFT.LEFT_WRIST]
 }
 
-function getRightHipToKnee() {
+function getRightHipToKneeConnectors() {
   return [POSE_LANDMARKS_RIGHT.RIGHT_HIP, POSE_LANDMARKS_RIGHT.RIGHT_KNEE];
 }
 
-function getRightKneeToAnkle() {
+function getRightKneeToAnkleConnectors() {
   return [POSE_LANDMARKS_RIGHT.RIGHT_KNEE, POSE_LANDMARKS_RIGHT.RIGHT_ANKLE];
 }
 
-function getLeftHipToKnee() {
+function getLeftHipToKneeConnectors() {
   return [POSE_LANDMARKS_LEFT.LEFT_HIP, POSE_LANDMARKS_LEFT.LEFT_KNEE];
 }
 
-function getLeftKneeToAnkle() {
+function getLeftKneeToAnkleConnectors() {
   return [POSE_LANDMARKS_LEFT.LEFT_KNEE, POSE_LANDMARKS_LEFT.LEFT_ANKLE];
 }
 
 function getTorsoConnectors() {
   return []
+}
+
+function getLeftShoulderToHipConnectors() {
+  return [POSE_LANDMARKS_LEFT.LEFT_SHOULDER, POSE_LANDMARKS_LEFT.LEFT_HIP]
+}
+
+function getRightShoulderToHipConnectors() {
+  return [POSE_LANDMARKS_RIGHT.RIGHT_SHOULDER, POSE_LANDMARKS_RIGHT.RIGHT_HIP]
+}
+
+function getLeftToRightHipConnectors() {
+  return [POSE_LANDMARKS_LEFT.LEFT_HIP, POSE_LANDMARKS_RIGHT.RIGHT_HIP]
 }
 
 export {
@@ -174,9 +186,12 @@ export {
   getRightElbowToWristConnectors,
   getLeftShoulderToElbowConnectors,
   getLeftElbowToWristConnectors,
-  getRightHipToKnee,
-  getRightKneeToAnkle,
-  getLeftHipToKnee,
-  getLeftKneeToAnkle,
-  getTorsoConnectors
+  getRightHipToKneeConnectors,
+  getRightKneeToAnkleConnectors,
+  getLeftHipToKneeConnectors,
+  getLeftKneeToAnkleConnectors,
+  getTorsoConnectors,
+  getLeftShoulderToHipConnectors,
+  getRightShoulderToHipConnectors,
+  getLeftToRightHipConnectors
 }
