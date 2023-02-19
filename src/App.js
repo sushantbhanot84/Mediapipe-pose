@@ -1,6 +1,5 @@
 import "./App.css";
 import * as pose from '@mediapipe/pose'
-import smoothLandmarks from 'mediapipe-pose-smooth'; // ES6
 import { Camera } from '@mediapipe/camera_utils';
 import * as drawingUtils from "@mediapipe/drawing_utils"
 import { useRef, useEffect, useState, useDebugValue } from "react"
@@ -35,7 +34,7 @@ function App() {
         minTrackingConfidence: 0.5,
       });
 
-      mpPose.onResults((results) => smoothLandmarks(results, onResults));
+      mpPose.onResults(onResults);
       setMpPose(mpPose);
     }
 
@@ -87,10 +86,6 @@ function App() {
   }, [mpPose]);
 
   function onResults(results) {
-    if (!results?.poseLandmarks) {
-      return;
-    }
-
     const canvasElement = canvasRef.current
 
     canvasElement.width = results.image.width;
@@ -101,6 +96,7 @@ function App() {
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
+    if (!results?.poseLandmarks) return
     const simplifiedPoseLandmarks = mposeUtils.simplifyPoseLandmarks(results);
     const angles = mposeUtils.calcFullPoseAngles(simplifiedPoseLandmarks)
     console.log('full pose angles', angles)
