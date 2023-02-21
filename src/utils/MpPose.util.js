@@ -1,4 +1,4 @@
-import { POSE_LANDMARKS_LEFT, POSE_LANDMARKS_RIGHT } from '@mediapipe/pose';
+import { POSE_LANDMARKS_LEFT, POSE_LANDMARKS_RIGHT } from './drawPose.util';
 
 function angleBetweenLines(landmark1, landmark2, landmark3) {
   const { x: x1, y: y1 } = landmark1;

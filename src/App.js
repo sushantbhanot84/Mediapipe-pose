@@ -1,10 +1,8 @@
 import "./App.css";
-import * as pose from '@mediapipe/pose'
+import { Pose } from '@mediapipe/pose'
 import { Camera } from '@mediapipe/camera_utils';
-import * as drawingUtils from "@mediapipe/drawing_utils"
-import { useRef, useEffect, useState, useDebugValue } from "react"
-import TPose from "./PoseClassifiers/Yoga/TPose";
-import * as mposeUtils from './utils/MpPose.util'
+import { useRef, useEffect, useState } from "react"
+import * as drawUtils from './utils/drawPose.util'
 
 
 function App() {
@@ -18,7 +16,7 @@ function App() {
     if (mpPose) return;
 
     function initPose() {
-      const mpPose = new pose.Pose({
+      const mpPose = new Pose({
         locateFile: (file) => {
           return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
         },
@@ -69,7 +67,7 @@ function App() {
         const isStatic = window.location.href.includes('/static'); // based on route, choose the camera feed or image for pose detection
         if (isStatic) {
           const img = new Image();
-          img.src = './pose-images/t-pose-2.jpg';
+          img.src = './pose-images/t-pose.jpg';
 
           mpPose.send({ image: img });
           mpPose.onResults(onResults);
@@ -97,28 +95,7 @@ function App() {
     canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
     if (!results?.poseLandmarks) return
-    const simplifiedPoseLandmarks = mposeUtils.simplifyPoseLandmarks(results);
-    const angles = mposeUtils.calcFullPoseAngles(simplifiedPoseLandmarks)
-    console.log('full pose angles', angles)
-
-    const tPoseResult = TPose(angles);
-    console.log(pose.POSE_CONNECTIONS);
-
-    const poseLable = document.getElementById('pose-lable-text');
-    poseLable.innerHTML = tPoseResult.length < 1 ? 'Pose: T POSE' : 'Pose: UNKNOWN';
-
-    if (results.poseLandmarks) {
-      drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, pose.POSE_CONNECTIONS, { visibilityMin: 0.65, color: 'green' });
-      drawingUtils.drawConnectors(canvasCtx, results.poseLandmarks, tPoseResult, { visibilityMin: 0.65, color: 'red' });
-
-      drawingUtils.drawLandmarks(canvasCtx, Object.values(pose.POSE_LANDMARKS_LEFT)
-        .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(255,138,0)' });
-      drawingUtils.drawLandmarks(canvasCtx, Object.values(pose.POSE_LANDMARKS_RIGHT)
-        .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(0,217,231)' });
-      drawingUtils.drawLandmarks(canvasCtx, Object.values(pose.POSE_LANDMARKS_NEUTRAL)
-        .map(index => results.poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'white' });
-    }
-
+    drawUtils.drawPoseLandmarks(canvasCtx, results, "TPose")
     // canvasCtx.fillStyle = 'black';
     // canvasCtx.font = "bold 18px Arial";
     // canvasCtx.fillText(angles.left_armAngle, simplifiedPoseLandmarks[13].x, simplifiedPoseLandmarks[13].y, 800);
