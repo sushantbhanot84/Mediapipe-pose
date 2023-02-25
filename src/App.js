@@ -7,8 +7,8 @@ function App() {
   return (
     <Router>
       <Switch>
-        <Route extact path="/excercise/pushup" component={Pushup} ></Route>
-        <Route exact path="/excercise/tpose" component={Tpose}></Route>
+        <Route extact path="/exercise/pushup" component={Pushup} ></Route>
+        <Route exact path="/exercise/tpose" component={Tpose}></Route>
       </Switch>
     </Router>
   )

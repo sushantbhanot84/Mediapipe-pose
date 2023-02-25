@@ -1,6 +1,5 @@
 import { Camera } from '@mediapipe/camera_utils';
-import { Pose } from '@mediapipe/pose';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import useMediaPipe from '../../Core/useMediaPipe';
 import * as drawUtils from '../../utils/MpLandmarks.util'
 import './Tpose.css'
@@ -9,10 +8,9 @@ function Tpose() {
     const webcamRef = useRef(null);
     const canvasRef = useRef(null);
     const pose = useMediaPipe();
-    
+
     useEffect(() => {
         if (!pose) return;
-
         async function sendPose() {
             const camera = new Camera(webcamRef.current, {
                 onFrame: async () => {
@@ -36,7 +34,6 @@ function Tpose() {
             try {
                 const isStatic = window.location.href.includes('#'); // based on route, choose the camera feed or image for pose detection
                 if (isStatic) {
-
                     const img = new Image();
                     img.src = '../../pose-images/t-pose.jpg';
 
@@ -44,21 +41,17 @@ function Tpose() {
                     pose.onResults(onResults);
                     return;
                 }
-
                 await camera.start();
             } catch (error) {
                 console.log(error);
             }
         }
-
+        pose.onResults(onResults);
         sendPose();
-    }, []);
+    }, [pose]);
 
     function onResults(results) {
         const canvasElement = canvasRef.current
-
-        canvasElement.width = results.image.width;
-        canvasElement.height = results.image.height;
 
         const canvasCtx = canvasElement.getContext("2d")
         canvasCtx.save();
