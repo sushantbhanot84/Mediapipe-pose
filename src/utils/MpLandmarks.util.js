@@ -60,7 +60,6 @@ function getPoseConnections(angles, pose){
   let results;
   if(pose === "TPose")
     results = TPose(angles);
-
   return results
 }
 

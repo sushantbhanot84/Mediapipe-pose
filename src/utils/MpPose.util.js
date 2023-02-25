@@ -1,4 +1,4 @@
-import { POSE_LANDMARKS_LEFT, POSE_LANDMARKS_RIGHT } from './drawPose.util';
+import { POSE_LANDMARKS_LEFT, POSE_LANDMARKS_RIGHT } from './MpLandmarks.util';
 
 function angleBetweenLines(landmark1, landmark2, landmark3) {
   const { x: x1, y: y1 } = landmark1;
@@ -114,11 +114,11 @@ function calcHipsToTorsoAngles(landmarks) {
   return { right_hipToTorsoAngle, left_hipToTorsoAngle }
 }
 
-function simplifyPoseLandmarks(results) {
+function simplifyPoseLandmarks(results, minVisibility=0.5) {
   return results.poseLandmarks.map(landmark => {
     return {
-      x: landmark.x * results.image.width,
-      y: landmark.y * results.image.height,
+      x:  Math.min(Math.floor(landmark.x * results.image.width), results.image.width - 1),
+      y: Math.min(Math.floor(landmark.y * results.image.height), results.image.height - 1),
       visibility: landmark.visibility
     }
   });

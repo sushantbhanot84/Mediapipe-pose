@@ -2,7 +2,7 @@ import "./App.css";
 import { Pose } from '@mediapipe/pose'
 import { Camera } from '@mediapipe/camera_utils';
 import { useRef, useEffect, useState } from "react"
-import * as drawUtils from './utils/drawPose.util'
+import * as drawUtils from './utils/MpLandmarks.util'
 
 
 function App() {
@@ -67,7 +67,7 @@ function App() {
         const isStatic = window.location.href.includes('/static'); // based on route, choose the camera feed or image for pose detection
         if (isStatic) {
           const img = new Image();
-          img.src = './pose-images/t-pose.jpg';
+          img.src = './pose-images/pushups.jpg';
 
           mpPose.send({ image: img });
           mpPose.onResults(onResults);
