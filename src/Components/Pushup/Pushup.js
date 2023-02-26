@@ -59,7 +59,7 @@ function Pushup() {
          canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
          if (!results?.poseLandmarks) return
-         drawUtils.drawPoseLandmarks(canvasCtx, results, pushupClassifier)
+         drawUtils.drawPoseLandmarks(canvasCtx, results, pushupClassifier, "Pushup")
          // canvasCtx.fillStyle = 'black';
          // canvasCtx.font = "bold 18px Arial";
          // canvasCtx.fillText(angles.left_armAngle, simplifiedPoseLandmarks[13].x, simplifiedPoseLandmarks[13].y, 800);

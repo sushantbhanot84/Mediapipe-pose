@@ -1,10 +1,14 @@
 import { POSE_LANDMARKS_LEFT, POSE_LANDMARKS_RIGHT } from './MpLandmarks.util';
+const MIN_VISIBILITY = 0.3
 
-function angleBetweenLines(landmark1, landmark2, landmark3) {
-  const { x: x1, y: y1 } = landmark1;
-  const { x: x2, y: y2 } = landmark2;
-  const { x: x3, y: y3 } = landmark3;
+function angleBetweenLines(landmark1, landmark2, landmark3, minVisibility=MIN_VISIBILITY) {
+  const { x: x1, y: y1, visibility: l1_visibility } = landmark1;
+  const { x: x2, y: y2, visibility: l2_visibility } = landmark2;
+  const { x: x3, y: y3, visibility: l3_visibility } = landmark3;
 
+  if (![l1_visibility, l2_visibility, l3_visibility].every(v => v > minVisibility)){
+    return null
+  }
   let angle = (Math.atan2(y3 - y2, x3 - x2) - Math.atan2(y1 - y2, x1 - x2));
   angle = angle * 180 / Math.PI;
 
@@ -124,6 +128,12 @@ function simplifyPoseLandmarks(results, minVisibility=0.5) {
   });
 }
 
+function getPoseAngles(results){
+  const simplifiedPoseLandmarks = simplifyPoseLandmarks(results);
+  return calcFullPoseAngles(simplifiedPoseLandmarks)
+}
+
+
 function getRightShoulderToElbowConnectors() {
   return [POSE_LANDMARKS_RIGHT.RIGHT_SHOULDER, POSE_LANDMARKS_RIGHT.RIGHT_ELBOW]
 }
@@ -182,6 +192,7 @@ export {
   calcLeftLowerPoseAngles,
   calcHipsToTorsoAngles,
   simplifyPoseLandmarks,
+  getPoseAngles,
   getRightShoulderToElbowConnectors,
   getRightElbowToWristConnectors,
   getLeftShoulderToElbowConnectors,

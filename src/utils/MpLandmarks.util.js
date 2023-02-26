@@ -1,5 +1,4 @@
 import {drawConnectors, drawLandmarks} from "@mediapipe/drawing_utils"
-import TPose from '../PoseClassifiers/Yoga/TPose.classifier';
 import * as mposeUtils from './MpPose.util'
 
 const POSE_LANDMARKS_LEFT = {
@@ -41,7 +40,8 @@ const POSE_CONNECTIONS = [
 ]
 
 function drawPoseLandmarks(canvas, results, pose, poseText){
-  const invalidConnections = getPoseConnections(poseAngles(results), pose)
+  // const {validConnections, invalidConnections} = getPoseConnections(poseAngles(results), pose)
+  const invalidConnections = getPoseConnections(results, pose)
   const poseLable = document.getElementById('pose-lable-text');
   const { poseLandmarks } = results
 
@@ -53,17 +53,11 @@ function drawPoseLandmarks(canvas, results, pose, poseText){
   drawLandmarks(canvas, Object.values(POSE_LANDMARKS_RIGHT)
     .map(index => poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(0,217,231)' });
 
-  poseLable.innerHTML = results?.length < 1 ? `${poseText} Correct` : `${poseText} Incorrect`;
+  poseLable.innerHTML = results?.length < 1 ? `${poseText}: Correct` : `${poseText}: Incorrect`;
 }
 
-function getPoseConnections(angles, pose){
-  let results;
-  return pose(angles);
-}
-
-function poseAngles(results){
-  const simplifiedPoseLandmarks = mposeUtils.simplifyPoseLandmarks(results);
-  return mposeUtils.calcFullPoseAngles(simplifiedPoseLandmarks)
+function getPoseConnections(results, pose){
+  return pose(results);
 }
 
 export {

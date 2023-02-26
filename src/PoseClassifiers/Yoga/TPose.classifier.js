@@ -1,7 +1,9 @@
 import React from 'react'
 import * as mposeUtils from '../../utils/MpPose.util.js'
 
-function tPoseClassifier(angles) {
+function tPoseClassifier(results) {
+  const angles = mposeUtils.getPoseAngles(results)
+  console.log(angles)
   const redConnections = [];
 
   if (80 > angles.right_hipToTorsoAngle || 100 < angles.right_hipToTorsoAngle) {

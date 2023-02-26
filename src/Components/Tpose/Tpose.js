@@ -60,7 +60,6 @@ function Tpose() {
         canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
         if (!results?.poseLandmarks) return
-        console.log(tPoseClassifier)
         drawUtils.drawPoseLandmarks(canvasCtx, results, tPoseClassifier, "TPose")
         // canvasCtx.fillStyle = 'black';
         // canvasCtx.font = "bold 18px Arial";

@@ -1,10 +1,13 @@
 import React from 'react'
 import * as mposeUtils from '../../utils/MpPose.util.js'
 
-function pushupClassifier(angles) {
-  validatePushup(angles)
+function pushupClassifier(results) {
+  const angles = mposeUtils.getPoseAngles(results)
+
+  validatePushup(results)
 }
 
-function validatePushup(angles){
+function validatePushup(results){
 }
+
 export default pushupClassifier;
