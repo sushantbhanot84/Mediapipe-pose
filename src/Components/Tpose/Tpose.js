@@ -1,6 +1,7 @@
 import { Camera } from '@mediapipe/camera_utils';
 import { useEffect, useRef } from 'react';
 import useMediaPipe from '../../Core/useMediaPipe';
+import TPose from '../../PoseClassifiers/Yoga/TPose.Classifier';
 import * as drawUtils from '../../utils/MpLandmarks.util'
 import './Tpose.css'
 
@@ -59,7 +60,7 @@ function Tpose() {
         canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
 
         if (!results?.poseLandmarks) return
-        drawUtils.drawPoseLandmarks(canvasCtx, results, "TPose")
+        drawUtils.drawPoseLandmarks(canvasCtx, results, TPose)
         // canvasCtx.fillStyle = 'black';
         // canvasCtx.font = "bold 18px Arial";
         // canvasCtx.fillText(angles.left_armAngle, simplifiedPoseLandmarks[13].x, simplifiedPoseLandmarks[13].y, 800);

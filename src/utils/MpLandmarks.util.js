@@ -1,5 +1,4 @@
 import {drawConnectors, drawLandmarks} from "@mediapipe/drawing_utils"
-import TPose from '../PoseClassifiers/Yoga/TPose';
 import * as mposeUtils from './MpPose.util'
 
 const POSE_LANDMARKS_LEFT = {
@@ -40,8 +39,8 @@ const POSE_CONNECTIONS = [
   [POSE_LANDMARKS.RIGHT_KNEE, POSE_LANDMARKS.RIGHT_ANKLE]
 ]
 
-function drawPoseLandmarks(canvas, results, pose){
-  const invalidConnections = getPoseConnections(poseAngles(results), pose)
+function drawPoseLandmarks(canvas, results, poseClassifierCallback){
+  const { invalidConnections, pose } = poseClassifierCallback(poseAngles(results));
   const poseLable = document.getElementById('pose-lable-text');
   const { poseLandmarks } = results
 
@@ -53,14 +52,7 @@ function drawPoseLandmarks(canvas, results, pose){
   drawLandmarks(canvas, Object.values(POSE_LANDMARKS_RIGHT)
     .map(index => poseLandmarks[index]), { visibilityMin: 0.65, color: 'white', fillColor: 'rgb(0,217,231)' });
 
-  poseLable.innerHTML = results?.length < 1 ? `${pose} Correct` : `${pose} Incorrect`;
-}
-
-function getPoseConnections(angles, pose){
-  let results;
-  if(pose === "TPose")
-    results = TPose(angles);
-  return results
+  poseLable.innerHTML = invalidConnections?.length < 1 ? `${pose} Correct` : `${pose} Incorrect`;
 }
 
 function poseAngles(results){
